@@ -348,7 +348,7 @@ class Particle {
 }
 
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(1920, 1080);
   gravityCenter = null;
 }
 
@@ -397,13 +397,6 @@ function draw() {
     }
   }
 
-  // 정보 표시
-  fill(255);
-  noStroke();
-  textSize(14);
-  text(`입자 수: ${particles.length}`, 10, 20);
-  text(`원 개수: ${orbs.length}`, 10, 40);
-}
 
 function mousePressed() {
   gravityCenter = createVector(mouseX, mouseY);
