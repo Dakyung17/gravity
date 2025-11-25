@@ -2,7 +2,7 @@ let particles = [];
 let gravityCenter;
 let orbs = []; // 생성된 원들을 저장
 const G = 1500; // 중력 상수
-const baseDecayInterval = 30; // 기본 수명 감소 간격(ms)
+const baseDecayInterval = 100; // 기본 수명 감소 간격(ms)
 const fadeTrailLength = 10; // 잔상으로 보이는 수명 범위
 
 class Orb {
