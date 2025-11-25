@@ -163,7 +163,7 @@ class Particle {
 
     // 랜덤한 초기 방향
     const angle = random(TWO_PI);
-    const speed = random(1, 3);
+    const speed = random(2, 5);
     this.vel = createVector(cos(angle) * speed, sin(angle) * speed);
     this.acc = createVector(0, 0);
     
@@ -412,7 +412,7 @@ function draw() {
   }
 
   // 새 입자 생성
-  if (random(1) < 0.4 && particles.length < 150) {
+  if (random(1) < 0.7 && particles.length < 150) {
     particles.push(new Particle());
   }
 
