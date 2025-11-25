@@ -50,10 +50,15 @@ class Orb {
   }
   
   display() {
+    // 흡수 진행도에 따른 알파 조정 (100% -> 40%)
+    const absorptionProgress = this.absorbedParticles / this.requiredParticles;
+    const absorptionAlpha = map(absorptionProgress, 0, 1, 1, 0.4);
+    const finalAlpha = this.alpha * absorptionAlpha;
+    
     // 글로우 효과 (외곽 발광)
     const glowSteps = 8;
     for (let i = glowSteps; i > 0; i--) {
-      const glowAlpha = map(i, glowSteps, 0, 0, 30) * this.alpha;
+      const glowAlpha = map(i, glowSteps, 0, 0, 30) * finalAlpha;
       const glowSize = this.size * 2 + i * 4;
       
       // 채도를 높인 색상
@@ -70,7 +75,7 @@ class Orb {
     // radial gradient 효과 (중심이 불투명, 외곽이 투명)
     const steps = 20;
     for (let i = 0; i < steps; i++) {
-      const alpha = map(i, 0, steps, 0, 50) * this.alpha;
+      const alpha = map(i, 0, steps, 0, 50) * finalAlpha;
       fill(this.color.r, this.color.g, this.color.b, alpha);
       noStroke();
       circle(this.pos.x, this.pos.y, (this.size / steps) * (steps - i) * 2);
@@ -78,19 +83,32 @@ class Orb {
     
     // 아웃라인
     noFill();
-    stroke(this.color.r, this.color.g, this.color.b, 200 * this.alpha);
+    stroke(this.color.r, this.color.g, this.color.b, 200 * finalAlpha);
     strokeWeight(2);
     circle(this.pos.x, this.pos.y, this.size * 2);
     
     // 중력장 시각화 (페이드인이 완료된 후)
     if (this.alpha > 0.8) {
-      noFill();
-      stroke(this.color.r, this.color.g, this.color.b, 20 * this.alpha);
-      strokeWeight(1);
-      const maxRadius = map(this.gravityStrength, 500, 1500, 150, 300);
-      for (let r = this.size * 2 + 30; r < maxRadius; r += 30) {
-        circle(this.pos.x, this.pos.y, r);
-      }
+      this.drawGravityField(this.pos.x, this.pos.y, this.color, this.gravityStrength, 0.3+finalAlpha);
+    }
+  }
+  
+  // 중력장 그리기 함수 (마우스와 원이 동일하게 사용)
+  drawGravityField(x, y, color, strength, alphaMultiplier) {
+    const maxRadius = map(strength, 500, 1500, 250, 600);
+    let r = this.size * 2 + 30;
+    
+    noFill();
+    strokeWeight(1);
+    
+    while (r < maxRadius) {
+      // 거리에 반비례하는 불투명도 (50% -> 20%)
+      const distanceAlpha = map(r, this.size * 2, maxRadius, 70, 20);
+      stroke(color.r, color.g, color.b, distanceAlpha * alphaMultiplier);
+      circle(x, y, r);
+      
+      // 급수적 증가 (1.5배씩)
+      r *= 1.5;
     }
   }
   
@@ -348,7 +366,7 @@ class Particle {
 }
 
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(windowWidth, windowHeight);
   gravityCenter = null;
 }
 
@@ -362,12 +380,24 @@ function draw() {
     circle(gravityCenter.x, gravityCenter.y, 40);
     
     // 중력장 시각화
+    
+    let r=70
     noFill();
-    stroke(255, 200, 50, 30);
     strokeWeight(1);
-    for (let r = 50; r < 400; r += 50) {
-      circle(gravityCenter.x, gravityCenter.y, r * 2);
+    
+    while (r<600) {
+      const distanceAlpha = map(r, 40, 600, 70, 20);
+      stroke(255,200,50, distanceAlpha);
+      circle(gravityCenter.x, gravityCenter.y,r);
+      r*=1.5;
     }
+    
+//    noFill();
+//    stroke(255, 200, 50, 30);
+//    strokeWeight(1);
+//    for (let r = 50; r < 400; r += 50) {
+//      circle(gravityCenter.x, gravityCenter.y, r * 2);
+//    }
   }
   
   // 생성된 원들 업데이트 및 표시
@@ -397,12 +427,7 @@ function draw() {
     }
   }
 
-  // 정보 표시
-  fill(255);
-  noStroke();
-  textSize(14);
-  text(`입자 수: ${particles.length}`, 10, 20);
-  text(`원 개수: ${orbs.length}`, 10, 40);
+
 }
 
 function mousePressed() {
